@@ -8,13 +8,11 @@ COPY pom.xml .
 # Download dependencies
 RUN mvn dependency:go-offline -B
 
-# Copy source code and Maven wrapper
-COPY .mvn .mvn
-COPY mvnw .
+# Copy source code
 COPY src ./src
 
 # Build application
-RUN chmod +x mvnw && ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-alpine
