@@ -49,7 +49,7 @@ jobs:
           docker run -d \
             --name ${{ env.SERVICE_NAME }} \
             -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \
-            --network lifepill-network \
+            --network lifepill-customer-mobi_lifepill-network \
             -e DB_DATABASE_URL="jdbc:postgresql://lifepill-postgres:5432/lifepill" \
             -e DB_USER="postgres" \
             -e DB_PASSWORD="postgres" \
