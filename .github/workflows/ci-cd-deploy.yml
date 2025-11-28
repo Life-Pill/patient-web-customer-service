@@ -45,16 +45,22 @@ jobs:
 
       - name: Deploy container
         run: |
+          echo "Deploying container with environment variables..."
+          echo "Database URL length: ${#DB_DATABASE_URL}"
+          echo "Database User length: ${#DB_USER}"
           docker run -d \
             --name ${{ env.SERVICE_NAME }} \
             -p ${{ env.SERVICE_PORT }}:${{ env.SERVICE_PORT }} \
-            -e DB_DATABASE_URL=${{ secrets.DB_DATABASE_URL }} \
-            -e DB_USER=${{ secrets.DB_USER }} \
-            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e MDB_CONNECTION_STRING=${{ secrets.MDB_CONNECTION_STRING }} \
-            -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+            -e DB_DATABASE_URL="${{ secrets.DB_DATABASE_URL }}" \
+            -e DB_USER="${{ secrets.DB_USER }}" \
+            -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            -e MDB_CONNECTION_STRING="${{ secrets.MDB_CONNECTION_STRING }}" \
+            -e STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
             --restart unless-stopped \
             ${{ env.SERVICE_NAME }}:latest
+        env:
+          DB_DATABASE_URL: ${{ secrets.DB_DATABASE_URL }}
+          DB_USER: ${{ secrets.DB_USER }}
 
       - name: Wait for service to be ready
         run: |
