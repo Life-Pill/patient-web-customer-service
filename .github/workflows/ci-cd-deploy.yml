@@ -19,7 +19,7 @@ env:
 jobs:
   build-and-deploy:
     name: Build Docker and Deploy
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ip-172-31-3-215
 
     steps:
       - name: Checkout code
