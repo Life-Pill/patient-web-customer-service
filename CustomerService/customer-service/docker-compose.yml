@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  customer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lifepill-customer-service
+    ports:
+      - "8070:8070"
+    environment:
+      # Database configuration
+      - DB_DATABASE_URL=${DB_DATABASE_URL:-jdbc:postgresql://postgres:5432/lifepill}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+
+      # MongoDB configuration
+      - MDB_CONNECTION_STRING=${MDB_CONNECTION_STRING:-mongodb://mongo:27017/lifepill}
+
+      # Stripe configuration
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+
+      # JVM options
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    depends_on:
+      - postgres
+      - mongo
+    networks:
+      - lifepill-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8070/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: lifepill-postgres
+    environment:
+      - POSTGRES_DB=lifepill
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - lifepill-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7-jammy
+    container_name: lifepill-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - lifepill-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  mongo-data:
+
+networks:
+  lifepill-network:
+    driver: bridge

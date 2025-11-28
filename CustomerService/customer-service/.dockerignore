@@ -1,0 +1,10 @@
+target/
+!target/lifepill-customer-service.jar
+.git
+.gitignore
+.idea
+*.iml
+*.md
+.DS_Store
+env.properties
+*.log
