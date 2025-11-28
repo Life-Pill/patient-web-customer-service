@@ -19,7 +19,7 @@ env:
 jobs:
   build-and-deploy:
     name: Build Docker and Deploy
-    runs-on: self-hosted
+    runs-on: [self-hosted, lifepill]
 
     steps:
       - name: Checkout code
