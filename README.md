@@ -80,3 +80,10 @@ The project includes a GitHub Actions workflow that automatically:
 
 Configure GitHub Secrets for deployment: `SERVER_HOST`, `SERVER_USER`, `SSH_PRIVATE_KEY`, `DB_DATABASE_URL`, `DB_USER`, `DB_PASSWORD`, `MDB_CONNECTION_STRING`, `STRIPE_SECRET_KEY`
 
+```docker exec lifepill-postgres psql -U postgres -c "CREATE DATABASE branch_service_db;" && \
+docker exec lifepill-postgres psql -U postgres -c "CREATE DATABASE inventory_service_db;" && \
+docker exec lifepill-postgres psql -U postgres -c "CREATE DATABASE customer_service_db;" && \
+docker exec lifepill-postgres psql -U postgres -c "CREATE DATABASE identity_service_db;" && \
+docker exec lifepill-postgres psql -U postgres -c "CREATE DATABASE mobile_user_auth_db;" && \
+echo "All databases created"
+```
