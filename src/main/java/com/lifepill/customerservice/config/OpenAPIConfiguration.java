@@ -1,5 +1,6 @@
 package com.lifepill.customerservice.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,15 +19,27 @@ public class OpenAPIConfiguration {
     @Value("${server.port:8070}")
     private String serverPort;
 
+    @Value("${swagger.server.url:}")
+    private String swaggerServerUrl;
+
     @Bean
     public OpenAPI defineOpenApi() {
-        Server localServer = new Server()
+        List<Server> servers = new ArrayList<>();
+        
+        // Add configured server URL first if provided
+        if (swaggerServerUrl != null && !swaggerServerUrl.isEmpty()) {
+            servers.add(new Server()
+                    .url(swaggerServerUrl)
+                    .description("Primary Server"));
+        }
+        
+        servers.add(new Server()
                 .url("http://localhost:" + serverPort)
-                .description("Local Development Server");
+                .description("Local Development Server"));
 
-        Server gatewayServer = new Server()
+        servers.add(new Server()
                 .url("http://localhost:9191")
-                .description("API Gateway Server");
+                .description("API Gateway Server"));
 
         Contact contact = new Contact()
                 .name("LifePill Team")
@@ -47,6 +60,6 @@ public class OpenAPIConfiguration {
 
         return new OpenAPI()
                 .info(information)
-                .servers(List.of(localServer, gatewayServer));
+                .servers(servers);
     }
 }
