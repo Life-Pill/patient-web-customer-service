@@ -30,8 +30,11 @@ public interface InventoryServiceClient {
     /**
      * Get item by ID.
      */
-    @GetMapping("/item/get-by-id")
-    Map<String, Object> getItemById(@RequestParam("id") Long id);
+    /**
+     * Get item by ID.
+     */
+    @GetMapping("/item/get-item-details-by-id/{id}")
+    Map<String, Object> getItemById(@org.springframework.web.bind.annotation.PathVariable("id") Long id);
 
     /**
      * Reduce stock quantity for an item.
