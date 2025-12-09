@@ -61,11 +61,23 @@ public class MobileApiController {
             // Get all branches for availability info
             Map<String, Object> branchResponse = branchServiceClient.getAllBranches();
             
-            // Combine results - this is a simplified version
-            // In production, you'd want to join inventory with branch data
+            // Extract items list from inventory response
+            List<Map<String, Object>> items = extractItemsList(inventoryResponse);
+            
+            // Extract branches list from branch response
+            List<Map<String, Object>> branches = extractBranchesList(branchResponse);
+            
+            // Merge item details into branches
+            List<Map<String, Object>> enrichedBranches = mergeBranchesWithItems(branches, items);
+            
+            // Build final response structure matching branches format
+            Map<String, Object> branchesWrapper = new HashMap<>();
+            branchesWrapper.put("code", 200);
+            branchesWrapper.put("message", "Success");
+            branchesWrapper.put("data", enrichedBranches);
+            
             Map<String, Object> result = new HashMap<>();
-            result.put("items", inventoryResponse);
-            result.put("branches", branchResponse);
+            result.put("branches", branchesWrapper);
             
             return ResponseEntity.ok(new StandardResponse(200, "Search results", result));
         } catch (Exception e) {
@@ -74,6 +86,79 @@ public class MobileApiController {
                     .body(new StandardResponse(500, "Failed to search medicine: " + e.getMessage(), null));
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> extractItemsList(Map<String, Object> inventoryResponse) {
+        if (inventoryResponse != null && inventoryResponse.containsKey("data")) {
+            Object dataObj = inventoryResponse.get("data");
+            
+            // Handle case where data is directly a List
+            if (dataObj instanceof List) {
+                return (List<Map<String, Object>>) dataObj;
+            }
+            
+            // Handle case where data is a Map containing another "data" key
+            if (dataObj instanceof Map) {
+                Map<String, Object> dataMap = (Map<String, Object>) dataObj;
+                if (dataMap.containsKey("data")) {
+                    Object innerData = dataMap.get("data");
+                    if (innerData instanceof List) {
+                        return (List<Map<String, Object>>) innerData;
+                    }
+                }
+            }
+        }
+        return new ArrayList<>();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> extractBranchesList(Map<String, Object> branchResponse) {
+        if (branchResponse != null && branchResponse.containsKey("data")) {
+            Object data = branchResponse.get("data");
+            if (data instanceof List) {
+                return (List<Map<String, Object>>) data;
+            }
+        }
+        return new ArrayList<>();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> mergeBranchesWithItems(
+            List<Map<String, Object>> branches, 
+            List<Map<String, Object>> items) {
+        
+        List<Map<String, Object>> enriched = new ArrayList<>();
+        
+        // For each item, find matching branches and add item details
+        for (Map<String, Object> item : items) {
+            Object itemBranchId = item.get("branchId");
+            
+            for (Map<String, Object> branch : branches) {
+                Object branchId = branch.get("branchId");
+                
+                // If item is at this branch, create enriched branch object
+                if (itemBranchId != null && itemBranchId.equals(branchId)) {
+                    Map<String, Object> enrichedBranch = new HashMap<>(branch);
+                    
+                    // Add item-specific fields
+                    enrichedBranch.put("itemId", item.get("itemId"));
+                    enrichedBranch.put("itemBarCode", item.get("itemBarCode"));
+                    enrichedBranch.put("measuringUnitType", item.get("measuringUnitType"));
+                    enrichedBranch.put("isAvailable", item.get("stock"));
+                    enrichedBranch.put("quantityAvailable", item.get("itemQuantity"));
+                    enrichedBranch.put("unitPrice", item.get("sellingPrice"));
+                    enrichedBranch.put("itemName", item.get("itemName"));
+                    enrichedBranch.put("itemImage", item.get("itemImage"));
+                    enrichedBranch.put("itemDescription", item.get("itemDescription"));
+                    
+                    enriched.add(enrichedBranch);
+                }
+            }
+        }
+        
+        return enriched;
+    }
+
 
     /**
      * Get all pharmacy locations.
