@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,17 +21,25 @@ import java.util.*;
  * Mobile API Controller for mobile app users (authenticated via user-auth).
  * Provides endpoints for medicine search, pharmacy locations, and order history.
  */
-@Slf4j
 @RestController
 @RequestMapping("/lifepill/v1/mobile")
-@RequiredArgsConstructor
 @Tag(name = "Mobile API", description = "APIs for mobile app users (medicine search, pharmacies, orders)")
 @SecurityRequirement(name = "bearerAuth")
 public class MobileApiController {
 
+    private static final Logger log = LoggerFactory.getLogger(MobileApiController.class);
+
     private final InventoryServiceClient inventoryServiceClient;
     private final BranchServiceClient branchServiceClient;
     private final PrescriptionOrderService prescriptionOrderService;
+
+    public MobileApiController(InventoryServiceClient inventoryServiceClient,
+                               BranchServiceClient branchServiceClient,
+                               PrescriptionOrderService prescriptionOrderService) {
+        this.inventoryServiceClient = inventoryServiceClient;
+        this.branchServiceClient = branchServiceClient;
+        this.prescriptionOrderService = prescriptionOrderService;
+    }
 
     /**
      * Search for medicine by name.

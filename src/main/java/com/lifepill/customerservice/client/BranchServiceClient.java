@@ -21,9 +21,9 @@ public interface BranchServiceClient {
     Map<String, Object> getAllBranches();
 
     /**
-     * Get branch by ID.
+     * Get branch by ID using path variable.
      */
-    @GetMapping("/branch/get-by-id/{branchId}")
+    @GetMapping("/branch/get-branch/{branchId}")
     Map<String, Object> getBranchById(@PathVariable("branchId") Long branchId);
 
     /**

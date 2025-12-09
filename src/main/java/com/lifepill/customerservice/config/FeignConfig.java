@@ -3,7 +3,8 @@ package com.lifepill.customerservice.config;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -13,9 +14,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * Feign client configuration for inter-service communication.
  * Propagates JWT token from incoming request to outgoing Feign calls.
  */
-@Slf4j
 @Configuration
 public class FeignConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(FeignConfig.class);
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
