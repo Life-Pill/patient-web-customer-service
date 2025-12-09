@@ -2,9 +2,9 @@ package com.lifepill.customerservice.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,4 +32,15 @@ public interface InventoryServiceClient {
      */
     @GetMapping("/item/get-by-id")
     Map<String, Object> getItemById(@RequestParam("id") Long id);
+
+    /**
+     * Reduce stock quantity for an item.
+     * Used when orders are placed.
+     */
+    @PutMapping("/item/reduce-stock")
+    Map<String, Object> reduceStock(
+            @RequestParam("itemId") Long itemId,
+            @RequestParam("branchId") Long branchId,
+            @RequestParam("quantity") Integer quantity
+    );
 }

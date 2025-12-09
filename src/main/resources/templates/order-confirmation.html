@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+        }
+        .order-id {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        .order-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .item-row {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: right;
+            padding: 15px 0;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 10px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Order Confirmation</h1>
+        <p>Thank you for your order!</p>
+    </div>
+    
+    <div class="content">
+        <p>Hi <span th:text="${userEmail}">Customer</span>,</p>
+        
+        <p>Your order has been confirmed and is being processed.</p>
+        
+        <div class="order-id">
+            Order #<span th:text="${orderId}">12345</span>
+        </div>
+        
+        <p><strong>Order Date:</strong> <span th:text="${orderDate}">Date</span></p>
+        
+        <div class="order-details">
+            <h3>Order Items:</h3>
+            <div th:each="item : ${items}" class="item-row">
+                <div>
+                    <strong th:text="${item.itemName}">Item Name</strong>
+                    <br/>
+                    <small th:text="${item.pharmacyName}">Pharmacy</small>
+                    <br/>
+                    <small>Qty: <span th:text="${item.quantity}">1</span> <span th:text="${item.unit}">units</span></small>
+                </div>
+                <div>
+                    Rs. <span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span>
+                </div>
+            </div>
+            
+            <div class="total">
+                Total: Rs. <span th:text="${#numbers.formatDecimal(totalAmount, 1, 2)}">0.00</span>
+            </div>
+        </div>
+        
+        <p><strong>Payment Method:</strong> <span th:text="${paymentMethod}">Card</span></p>
+        
+        <p>We'll notify you when your order is ready for pickup/delivery.</p>
+        
+        <p>If you have any questions, please contact our support team.</p>
+    </div>
+    
+    <div class="footer">
+        <p>&copy; 2024 LifePill Pharmacy</p>
+        <p>Your trusted healthcare partner</p>
+    </div>
+</body>
+</html>

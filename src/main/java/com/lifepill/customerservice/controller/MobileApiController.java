@@ -2,9 +2,13 @@ package com.lifepill.customerservice.controller;
 
 import com.lifepill.customerservice.client.BranchServiceClient;
 import com.lifepill.customerservice.client.InventoryServiceClient;
+import com.lifepill.customerservice.dto.MobileOrderRequest;
+import com.lifepill.customerservice.dto.MobileOrderResponse;
 import com.lifepill.customerservice.model.PrescriptionOrder;
+import com.lifepill.customerservice.service.MobileOrderService;
 import com.lifepill.customerservice.service.PrescriptionOrderService;
 import com.lifepill.customerservice.util.StandardResponse;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,13 +36,16 @@ public class MobileApiController {
     private final InventoryServiceClient inventoryServiceClient;
     private final BranchServiceClient branchServiceClient;
     private final PrescriptionOrderService prescriptionOrderService;
+    private final MobileOrderService mobileOrderService;
 
     public MobileApiController(InventoryServiceClient inventoryServiceClient,
                                BranchServiceClient branchServiceClient,
-                               PrescriptionOrderService prescriptionOrderService) {
+                               PrescriptionOrderService prescriptionOrderService,
+                               MobileOrderService mobileOrderService) {
         this.inventoryServiceClient = inventoryServiceClient;
         this.branchServiceClient = branchServiceClient;
         this.prescriptionOrderService = prescriptionOrderService;
+        this.mobileOrderService = mobileOrderService;
     }
 
     /**
@@ -203,21 +210,40 @@ public class MobileApiController {
     }
 
     /**
-     * Get user's order history (prescription orders).
+     * Create a new order.
+     */
+    @PostMapping("/orders")
+    @Operation(summary = "Create order", description = "Create a new order with items from pharmacy")
+    public ResponseEntity<StandardResponse> createOrder(
+            @Valid @RequestBody MobileOrderRequest orderRequest,
+            HttpServletRequest request) {
+        
+        UUID userId = (UUID) request.getAttribute("userId");
+        log.info("User {} creating new order", userId);
+        
+        try {
+            MobileOrderResponse orderResponse = mobileOrderService.createOrder(orderRequest, userId);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new StandardResponse(201, "Order created successfully", orderResponse));
+        } catch (Exception e) {
+            log.error("Error creating order: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new StandardResponse(500, "Failed to create order: " + e.getMessage(), null));
+        }
+    }
+
+    /**
+     * Get user's order history.
      */
     @GetMapping("/orders/history")
-    @Operation(summary = "Get order history", description = "Get authenticated user's prescription order history")
+    @Operation(summary = "Get order history", description = "Get authenticated user's order history")
     public ResponseEntity<StandardResponse> getOrderHistory(HttpServletRequest request) {
         
         UUID userId = (UUID) request.getAttribute("userId");
         log.info("User {} requesting order history", userId);
         
         try {
-            // Get prescription orders for user
-            // Note: In production, you'd filter by the user's customer ID
-            // For now, return empty list since we need to map user ID to customer ID
-            List<PrescriptionOrder> orders = new ArrayList<>();
-            
+            List<MobileOrderResponse> orders = mobileOrderService.getOrderHistory(userId);
             return ResponseEntity.ok(new StandardResponse(200, "Order history retrieved", orders));
         } catch (Exception e) {
             log.error("Error getting order history: {}", e.getMessage(), e);
